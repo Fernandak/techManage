@@ -1,0 +1,8 @@
+CREATE TABLE tb_users (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    full_name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    phone VARCHAR(20) NOT NULL,
+    birth_date DATE NOT NULL,
+    user_type VARCHAR(50) NOT NULL
+);
