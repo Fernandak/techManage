@@ -1,5 +1,6 @@
 package com.techmanage.exception;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -15,9 +16,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<Map<String, String>> handleUserNotFound(UserNotFoundException ex) {
-        Map<String, String> error = new HashMap<>();
-        error.put("erro", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Map.of("erro", ex.getMessage()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -35,4 +35,12 @@ public class GlobalExceptionHandler {
         error.put("erro", "Erro inesperado: " + ex.getMessage());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
     }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<Map<String, String>> handleEmailDuplicate(DataIntegrityViolationException ex) {
+        Map<String, String> error = new HashMap<>();
+        error.put("erro", "Já existe um usuário cadastrado com este e-mail.");
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
+
 }
