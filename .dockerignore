@@ -1,0 +1,7 @@
+target/
+.git
+src/.gitignore
+README.md
+../Dockerfile
+*.iml
+*.md
