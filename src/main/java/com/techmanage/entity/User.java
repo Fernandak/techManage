@@ -21,8 +21,7 @@ public class User {
     @Email(message = "Email precisa ser valido")
     @Column(unique = true)
     private String email;
-    //TODO regex
-    @Pattern(regexp = "", message = "Formato de telefone valido. ex: +55 11 99999-9999")
+    @Pattern(regexp = "^\\+\\d{2}\\s\\d{2}\\s\\d{5}-\\d{4}$",message = "Formato de telefone valido. ex: +55 11 99999-9999")
     @NotBlank(message = "Telefone é obrigatório")
     private String phone;
     @NotNull(message = "Data de nascimento é obrigatório")
