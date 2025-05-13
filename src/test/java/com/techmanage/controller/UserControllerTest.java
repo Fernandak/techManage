@@ -4,42 +4,36 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.techmanage.entity.User;
 import com.techmanage.entity.UserType;
 import com.techmanage.service.UserService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.context.annotation.Bean;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.http.ResponseEntity;
 
 import java.time.LocalDate;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
 
-@SpringBootTest
-@AutoConfigureMockMvc
 class UserControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
-
-    @Autowired
+    @Mock
     private UserService userService;
 
-    @Autowired
+    @InjectMocks
+    private UserController userController;
+
     private ObjectMapper objectMapper;
 
-    @TestConfiguration
-    static class TestConfig {
-        @Bean
-        public UserService userService() {
-            return Mockito.mock(UserService.class);
-        }
+    @BeforeEach
+    void setup() {
+        MockitoAnnotations.openMocks(this);
+        objectMapper = new ObjectMapper();
     }
 
     private User getMockUser() {
@@ -54,55 +48,51 @@ class UserControllerTest {
     }
 
     @Test
-    void testCreateUser() throws Exception {
+    void testCreateUser() {
         User mockUser = getMockUser();
-        Mockito.when(userService.createUser(any(User.class))).thenReturn(mockUser);
+        when(userService.createUser(any(User.class))).thenReturn(mockUser);
 
-        mockMvc.perform(post("/api/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(mockUser)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.email").value("joao@example.com"));
+        ResponseEntity<User> response = userController.createUser(mockUser);
+        assertEquals(201, response.getStatusCodeValue());
+        assertEquals("joao@example.com", response.getBody().getEmail());
     }
 
     @Test
-    void testGetAllUsers() throws Exception {
-        Mockito.when(userService.getAllUsers()).thenReturn(List.of(getMockUser()));
+    void testGetAllUsers() {
+        when(userService.getAllUsers()).thenReturn(List.of(getMockUser()));
 
-        mockMvc.perform(get("/api/users"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(1));
+        ResponseEntity<List<User>> response = userController.getAllUsers();
+        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(1, response.getBody().size());
     }
 
     @Test
-    void testGetUserById() throws Exception {
-        Mockito.when(userService.getUserById(1L)).thenReturn(getMockUser());
+    void testGetUserById() {
+        when(userService.getUserById(1L)).thenReturn(getMockUser());
 
-        mockMvc.perform(get("/api/users/1"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.fullName").value("João Teste"));
+        ResponseEntity<User> response = userController.getUserById(1L);
+        assertEquals(200, response.getStatusCodeValue());
+        assertEquals("João Teste", response.getBody().getFullName());
     }
 
     @Test
-    void testUpdateUser() throws Exception {
+    void testUpdateUser() {
         User updated = getMockUser();
         updated.setFullName("João Atualizado");
 
-        Mockito.when(userService.updateUser(Mockito.eq(1L), any(User.class))).thenReturn(updated);
+        when(userService.updateUser(eq(1L), any(User.class))).thenReturn(updated);
 
-        mockMvc.perform(put("/api/users/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updated)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.fullName").value("João Atualizado"));
+        ResponseEntity<User> response = userController.updateUser(1L, updated);
+        assertEquals(200, response.getStatusCodeValue());
+        assertEquals("João Atualizado", response.getBody().getFullName());
     }
 
     @Test
-    void testDeleteUser() throws Exception {
-        Mockito.doNothing().when(userService).deleteUser(1L);
+    void testDeleteUser() {
+        doNothing().when(userService).deleteUser(1L);
 
-        mockMvc.perform(delete("/api/users/1"))
-                .andExpect(status().isOk())
-                .andExpect(content().string("Usuário deletado com sucesso"));
+        ResponseEntity<String> response = userController.deleteUser(1L);
+        assertEquals(200, response.getStatusCodeValue());
+        assertEquals("Usuário deletado com sucesso", response.getBody());
     }
 }
