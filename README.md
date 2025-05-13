@@ -3,7 +3,15 @@
 API RESTful desenvolvida com Java + Spring Boot como parte de um desafio técnico. O sistema permite criar, consultar, atualizar e remover usuários, com validações e persistência em banco de dados relacional (H2).
 
 ---
+## Requisitos
 
+Antes de rodar o projeto, certifique-se de ter as seguintes ferramentas instaladas:
+
+- OpenJDK 17
+- Maven 3.8.7
+- Docker *(Se for rodar com container)*
+- Git
+---
 ## Tecnologias utilizadas
 
 - Java 17
